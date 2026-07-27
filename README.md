@@ -76,7 +76,7 @@ host_key_checking = False
 
 ## ansible playbook: defining what all need to be installed in the nodes mentioned in vi hosts:
 
-ubuntu@ip-172-31-20-140:~$ cat install.yaml
+##ubuntu@ip-172-31-20-140:~$ cat install.yaml
 ---
 - name: Configure Kubernetes Nodes
   hosts: k8s_cluster
