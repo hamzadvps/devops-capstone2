@@ -2,53 +2,51 @@ pipeline {
 
     agent any
 
+    environment {
+        IMAGE_NAME = "hamzadvps/devops-capstone2:latest}"
+    }
+
     stages {
 
-        stage('Build') {
-
+        stage('Checkout') {
             steps {
-
-                echo "Building Docker Image"
-
-                sh 'docker build -t website-app .'
-
+                git branch: 'main',
+                    url: 'https://github.com/hamzadvps/devops-capstone2.git'
             }
         }
 
-        stage('Test') {
-
+        stage('Build Docker Image') {
             steps {
-
-                echo "Testing"
-
-                sh '''
-		docker run --rm website-app sh -c "test -d /var/www/html" 
-		'''
-
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
 
-        stage('Prod') {
-
-            when {
-
-                branch 'master'
-            }
-
+        stage('Push to Docker Hub') {
             steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    docker push $IMAGE_NAME
+                    '''
+                }
+            }
+        }
 
-                echo "Deploying to Production"
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh 'kubectl apply -f deployment.yaml'
+                sh 'kubectl apply -f service.yaml'
+            }
+        }
 
-                sh '''
-                docker save website-app > website.tar
-                scp -o StrictHostKeyChecking=no website.tar ubuntu@172.31.23.253:/home/ubuntu
-
-                ssh ubuntu@172.31.23.253 "
-                docker load < website.tar
-                docker rm -f web || true
-                docker run -d --name web -p 80:80 website-app
-                "
-                '''
+        stage('Verify') {
+            steps {
+                sh 'kubectl get pods'
+                sh 'kubectl get svc'
             }
         }
     }
