@@ -3,7 +3,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "hamzadvps/devops-capstone2:latest}"
+        IMAGE_NAME = "hamzadvps/devops-capstone2:latest"
     }
 
     stages {
