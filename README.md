@@ -57,7 +57,6 @@ pipeline {
 
 ## vi hosts- to define on which nodes(prib ip add), reqd installations must be done.
 
-ubuntu@ip-172-31-20-140:~$ cat hosts
 [k8s_master]
 172.31.27.239
 
